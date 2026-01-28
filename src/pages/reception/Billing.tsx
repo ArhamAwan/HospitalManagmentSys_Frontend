@@ -211,7 +211,7 @@ export function ReceptionBilling() {
             </CardContent>
           </SurfaceCard>
 
-          {debounced.length >= 2 && search.isSuccess && (
+          {search.isSuccess && !search.isLoading && (
             <div className="overflow-hidden rounded-xl border bg-card">
               <Table>
                 <TableHeader>

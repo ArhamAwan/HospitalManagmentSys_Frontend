@@ -5,6 +5,7 @@ import { ReceptionDashboard } from '@/pages/reception/Dashboard'
 import { RegisterPatient } from '@/pages/reception/RegisterPatient'
 import { SearchPatient } from '@/pages/reception/SearchPatient'
 import { ReceptionBilling } from '@/pages/reception/Billing'
+import { ReceptionQueues } from '@/pages/reception/Queues'
 import { DoctorQueue } from '@/pages/doctor/Queue'
 import { PatientDetails } from '@/pages/doctor/PatientDetails'
 import { WaitingArea } from '@/pages/display/WaitingArea'
@@ -13,6 +14,7 @@ import { AdminUsers } from '@/pages/admin/Users'
 import { AdminConfig } from '@/pages/admin/Config'
 import { AdminSettings } from '@/pages/admin/Settings'
 import { AdminAuditLogs } from '@/pages/admin/AuditLogs'
+import { DoctorsDirectory } from '@/pages/admin/DoctorsDirectory'
 import { ChangePassword } from '@/pages/ChangePassword'
 import { ForgotPassword } from '@/pages/ForgotPassword'
 
@@ -55,9 +57,17 @@ function App() {
         }
       />
       <Route
+        path="/reception/queues"
+        element={
+          <ProtectedRoute allowedRoles={['RECEPTION', 'ADMIN']}>
+            <ReceptionQueues />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/doctor"
         element={
-          <ProtectedRoute allowedRoles={['DOCTOR', 'ADMIN']}>
+          <ProtectedRoute allowedRoles={['DOCTOR', 'ADMIN', 'RECEPTION']}>
             <DoctorQueue />
           </ProtectedRoute>
         }
@@ -107,6 +117,14 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={['ADMIN']}>
             <AdminAuditLogs />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/doctors"
+        element={
+          <ProtectedRoute allowedRoles={['ADMIN', 'RECEPTION']}>
+            <DoctorsDirectory />
           </ProtectedRoute>
         }
       />

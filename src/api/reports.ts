@@ -39,6 +39,10 @@ export interface QueueStatsReport {
   doctors: QueueDoctorStats[]
 }
 
+export interface TotalPatientsReport {
+  totalPatients: number
+}
+
 export const reportsApi = {
   getDailyVisits: async (date: string): Promise<DailyVisitsReport> => {
     const { data } = await apiClient.get<DailyVisitsReport>('/reports/daily-visits', {
@@ -58,6 +62,11 @@ export const reportsApi = {
     const { data } = await apiClient.get<QueueStatsReport>('/reports/queue-stats', {
       params: { date },
     })
+    return data
+  },
+
+  getTotalPatients: async (): Promise<TotalPatientsReport> => {
+    const { data } = await apiClient.get<TotalPatientsReport>('/reports/total-patients')
     return data
   },
 }

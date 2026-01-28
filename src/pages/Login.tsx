@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { useAuth } from '@/hooks/useAuth'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { UserRole } from '@/types/user'
 import { Loader2 } from 'lucide-react'
 
@@ -42,6 +42,7 @@ export function Login() {
   const navigate = useNavigate()
   const location = useLocation()
   const [error, setError] = useState<string | null>(null)
+  const [hasRedirected, setHasRedirected] = useState(false)
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -64,6 +65,13 @@ export function Login() {
     }
   }
 
+  useEffect(() => {
+    if (isAuthenticated && !hasRedirected) {
+      setHasRedirected(true)
+      navigate(from ?? '/reception', { replace: true })
+    }
+  }, [isAuthenticated, hasRedirected, navigate, from])
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
@@ -72,9 +80,12 @@ export function Login() {
     )
   }
 
-  if (isAuthenticated) {
-    navigate(from ?? '/reception', { replace: true })
-    return null
+  if (isAuthenticated && hasRedirected) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" aria-label="Redirecting" />
+      </div>
+    )
   }
 
   return (

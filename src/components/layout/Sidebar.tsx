@@ -27,19 +27,87 @@ interface NavItem {
   label: string
   icon: React.ElementType
   roles: string[]
+  section: 'RECEPTION' | 'DOCTOR' | 'ADMIN'
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { to: '/reception', label: 'Dashboard', icon: LayoutDashboard, roles: ['RECEPTION', 'ADMIN'] },
-  { to: '/reception/register', label: 'Register Patient', icon: UserPlus, roles: ['RECEPTION', 'ADMIN'] },
-  { to: '/reception/search', label: 'Search Patient', icon: Search, roles: ['RECEPTION', 'ADMIN'] },
-  { to: '/reception/billing', label: 'Billing', icon: CreditCard, roles: ['RECEPTION', 'ADMIN'] },
-  { to: '/doctor', label: 'Queue', icon: ListOrdered, roles: ['DOCTOR', 'ADMIN'] },
-  { to: '/admin', label: 'Admin Dashboard', icon: LayoutDashboard, roles: ['ADMIN'] },
-  { to: '/admin/users', label: 'Users', icon: Users, roles: ['ADMIN'] },
-  { to: '/admin/config', label: 'Configuration', icon: Settings2, roles: ['ADMIN'] },
-  { to: '/admin/settings', label: 'Settings', icon: SlidersHorizontal, roles: ['ADMIN'] },
-  { to: '/admin/audit-logs', label: 'Audit logs', icon: History, roles: ['ADMIN'] },
+  {
+    to: '/reception',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    roles: ['RECEPTION', 'ADMIN'],
+    section: 'RECEPTION',
+  },
+  {
+    to: '/reception/register',
+    label: 'Register Patient',
+    icon: UserPlus,
+    roles: ['RECEPTION', 'ADMIN'],
+    section: 'RECEPTION',
+  },
+  {
+    to: '/reception/search',
+    label: 'Search Patient',
+    icon: Search,
+    roles: ['RECEPTION', 'ADMIN'],
+    section: 'RECEPTION',
+  },
+  {
+    to: '/reception/billing',
+    label: 'Billing',
+    icon: CreditCard,
+    roles: ['RECEPTION', 'ADMIN'],
+    section: 'RECEPTION',
+  },
+  {
+    to: '/doctor',
+    label: 'Queue',
+    icon: ListOrdered,
+    roles: ['DOCTOR'],
+    section: 'DOCTOR',
+  },
+  {
+    to: '/admin',
+    label: 'Admin Dashboard',
+    icon: LayoutDashboard,
+    roles: ['ADMIN'],
+    section: 'ADMIN',
+  },
+  {
+    to: '/admin/users',
+    label: 'Users',
+    icon: Users,
+    roles: ['ADMIN'],
+    section: 'ADMIN',
+  },
+  {
+    to: '/admin/doctors',
+    label: 'Doctors',
+    icon: Users,
+    roles: ['ADMIN', 'RECEPTION'],
+    section: 'ADMIN',
+  },
+  {
+    to: '/admin/config',
+    label: 'Configuration',
+    icon: Settings2,
+    roles: ['ADMIN'],
+    section: 'ADMIN',
+  },
+  {
+    to: '/admin/settings',
+    label: 'Settings',
+    icon: SlidersHorizontal,
+    roles: ['ADMIN'],
+    section: 'ADMIN',
+  },
+  {
+    to: '/admin/audit-logs',
+    label: 'Audit logs',
+    icon: History,
+    roles: ['ADMIN'],
+    section: 'ADMIN',
+  },
 ]
 
 export function Sidebar({
@@ -51,6 +119,12 @@ export function Sidebar({
   const { user } = useAuth()
   const role = user?.role ?? ''
   const items = NAV_ITEMS.filter((item) => item.roles.includes(role))
+
+  const sections: { id: NavItem['section']; label: string }[] = [
+    { id: 'RECEPTION', label: 'Reception' },
+    { id: 'DOCTOR', label: 'Doctor' },
+    { id: 'ADMIN', label: 'Admin' },
+  ]
 
   return (
     <>
@@ -97,35 +171,51 @@ export function Sidebar({
             </Button>
           </div>
         </div>
-        <nav className="flex flex-col gap-1 p-2">
-          {items.map((item) => {
-            const Icon = item.icon
+        <nav className="flex flex-col gap-3 p-2">
+          {sections.map((section) => {
+            const sectionItems = items.filter((item) => item.section === section.id)
+            if (sectionItems.length === 0) return null
+
             return (
-              <NavLink
-                key={`${item.to}-${item.label}`}
-                to={item.to}
-                end={item.to === '/reception' || item.to === '/doctor' || item.to === '/admin'}
-                onClick={onClose}
-                className={({ isActive }) =>
-                  cn(
-                    'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
-                    collapsed && 'md:justify-center md:gap-0',
-                    isActive
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground'
-                  )
-                }
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                <span
-                  className={cn(
-                    'truncate',
-                    collapsed && 'hidden md:hidden'
-                  )}
-                >
-                  {item.label}
-                </span>
-              </NavLink>
+              <div key={section.id} className="space-y-1">
+                {!collapsed && (
+                  <div className="px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground/70">
+                    {section.label}
+                  </div>
+                )}
+                <div className="flex flex-col gap-1">
+                  {sectionItems.map((item) => {
+                    const Icon = item.icon
+                    return (
+                      <NavLink
+                        key={`${item.to}-${item.label}`}
+                        to={item.to}
+                        end={item.to === '/reception' || item.to === '/doctor' || item.to === '/admin'}
+                        onClick={onClose}
+                        className={({ isActive }) =>
+                          cn(
+                            'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+                            collapsed && 'md:justify-center md:gap-0',
+                            isActive
+                              ? 'bg-primary text-primary-foreground'
+                              : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground'
+                          )
+                        }
+                      >
+                        <Icon className="h-4 w-4 shrink-0" />
+                        <span
+                          className={cn(
+                            'truncate',
+                            collapsed && 'hidden md:hidden'
+                          )}
+                        >
+                          {item.label}
+                        </span>
+                      </NavLink>
+                    )
+                  })}
+                </div>
+              </div>
             )
           })}
         </nav>

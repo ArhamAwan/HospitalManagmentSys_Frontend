@@ -73,27 +73,19 @@ export function SearchPatient() {
             />
           )}
 
-          {debounced.length < 2 && (
-            <EmptyState
-              icon={Search}
-              title="Enter search"
-              description="Type at least 2 characters to search patients."
-            />
-          )}
-
-          {debounced.length >= 2 && search.isLoading && (
+          {search.isLoading && (
             <div className="flex justify-center py-12">
               <LoadingSpinner size="lg" text="Searching…" />
             </div>
           )}
 
-          {debounced.length >= 2 && search.isSuccess && (
+          {search.isSuccess && !search.isLoading && (
             <>
               {search.data.length === 0 ? (
                 <EmptyState
                   icon={UserPlus}
-                  title="No patients found"
-                  description="Try a different search or register a new patient."
+                  title="No patients yet"
+                  description="Registered patients will appear here as you add them."
                 />
               ) : (
                 <div className="overflow-hidden rounded-xl border bg-card">

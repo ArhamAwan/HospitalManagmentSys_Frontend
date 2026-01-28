@@ -6,7 +6,6 @@ export function usePatientsSearch(query: string) {
   return useQuery({
     queryKey: ['patients', 'search', query],
     queryFn: () => patientsApi.search(query),
-    enabled: query.length >= 2,
   })
 }
 

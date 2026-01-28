@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Layout } from '@/components/layout/Layout'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { QueueTable } from '@/components/QueueTable'
@@ -24,7 +24,9 @@ type EmergencyPayload = {
 
 export function DoctorQueue() {
   const navigate = useNavigate()
-  const { queue, isLoading, isError, refetch, connected, callNext, doctorId } = useQueue()
+  const [searchParams] = useSearchParams()
+  const doctorIdFromQuery = searchParams.get('doctorId') || undefined
+  const { queue, isLoading, isError, refetch, connected, callNext, doctorId } = useQueue(doctorIdFromQuery)
   const { subscribe } = useSocket()
 
   const [emergency, setEmergency] = useState<EmergencyPayload | null>(null)

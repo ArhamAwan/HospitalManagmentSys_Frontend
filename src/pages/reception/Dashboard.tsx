@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Layout } from '@/components/layout/Layout'
 import { PageContainer } from '@/components/layout/PageContainer'
@@ -8,12 +8,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { QueueTable } from '@/components/QueueTable'
 import { useQueue } from '@/hooks/useQueue'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { reportsApi } from '@/api/reports'
+import { visitsApi } from '@/api/visits'
+import type { Visit } from '@/types/visit'
+import { useSocket } from '@/hooks/useSocket'
 import { cn } from '@/lib/utils'
 import {
   Activity,
   ArrowRight,
   CalendarDays,
   Clock3,
+  ListOrdered,
   Search,
   UserPlus,
   Users,
@@ -29,14 +35,6 @@ function formatShortDate(date: Date) {
 
 function formatMonthYear(date: Date) {
   return new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' }).format(date)
-}
-
-function stableLoadLevel(dayNumber: number): LoadLevel {
-  // Deterministic (no Math.random) so the UI doesn't flicker between reloads.
-  const n = (dayNumber * 37 + 13) % 10
-  if (n <= 4) return 'low'
-  if (n <= 7) return 'medium'
-  return 'high'
 }
 
 function LoadDot({ level }: { level: LoadLevel }) {
@@ -87,24 +85,11 @@ function KpiCard({
   )
 }
 
-function PatientFlowCard() {
-  const bars = [
-    { newPatients: 8, returning: 4 },
-    { newPatients: 6, returning: 5 },
-    { newPatients: 5, returning: 3 },
-    { newPatients: 7, returning: 4 },
-    { newPatients: 10, returning: 5 },
-    { newPatients: 12, returning: 6 },
-    { newPatients: 9, returning: 5 },
-    { newPatients: 11, returning: 4 },
-    { newPatients: 13, returning: 6 },
-    { newPatients: 9, returning: 3 },
-    { newPatients: 7, returning: 4 },
-    { newPatients: 8, returning: 5 },
-    { newPatients: 10, returning: 4 },
-    { newPatients: 9, returning: 5 },
-  ]
-  const max = Math.max(...bars.map((b) => b.newPatients + b.returning))
+type PatientFlowPoint = { label: string; total: number }
+
+function PatientFlowCard({ data }: { data: PatientFlowPoint[] }) {
+  const totals = data.map((d) => d.total)
+  const max = totals.length ? Math.max(...totals) : 0
 
   return (
     <Card className="overflow-hidden">
@@ -130,28 +115,21 @@ function PatientFlowCard() {
           className="grid gap-3 rounded-xl border bg-gradient-to-br from-muted/40 to-background p-4"
         >
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Volume</span>
+            <span>Visits</span>
             <span>Last 14 days</span>
           </div>
 
           <div className="flex h-40 items-end gap-2">
-            {bars.map((b, i) => {
-              const total = b.newPatients + b.returning
-              const totalH = Math.max(10, Math.round((total / max) * 150))
-              const returningH = Math.round((b.returning / total) * totalH)
-              const newH = totalH - returningH
+            {data.map((point, i) => {
+              const total = point.total
+              const totalH = max > 0 ? Math.max(6, Math.round((total / max) * 150)) : 0
 
               return (
                 <div key={i} className="flex w-5 flex-col justify-end gap-0.5">
                   <div
                     className="w-full rounded-md bg-gradient-to-t from-primary/60 to-primary/30"
-                    style={{ height: newH }}
-                    title={`New: ${b.newPatients}`}
-                  />
-                  <div
-                    className="w-full rounded-md bg-gradient-to-t from-emerald-500/70 to-emerald-500/30"
-                    style={{ height: Math.max(6, returningH) }}
-                    title={`Returning: ${b.returning}`}
+                    style={{ height: totalH }}
+                    title={`Visits: ${total}`}
                   />
                 </div>
               )
@@ -162,9 +140,6 @@ function PatientFlowCard() {
             <span className="inline-flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-primary/70" /> New patients
             </span>
-            <span className="inline-flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-emerald-500/70" /> Returning patients
-            </span>
           </div>
         </div>
       </CardContent>
@@ -172,7 +147,13 @@ function PatientFlowCard() {
   )
 }
 
-function LoadCalendarCard({ today = new Date() }: { today?: Date }) {
+function LoadCalendarCard({
+  today = new Date(),
+  dayLevels,
+}: {
+  today?: Date
+  dayLevels: Record<number, LoadLevel | undefined>
+}) {
   const year = today.getFullYear()
   const month = today.getMonth()
   const first = new Date(year, month, 1)
@@ -181,7 +162,7 @@ function LoadCalendarCard({ today = new Date() }: { today?: Date }) {
 
   const dayCells: Array<{ day?: number; level?: LoadLevel }> = []
   for (let i = 0; i < startWeekday; i++) dayCells.push({})
-  for (let d = 1; d <= daysInMonth; d++) dayCells.push({ day: d, level: stableLoadLevel(d) })
+  for (let d = 1; d <= daysInMonth; d++) dayCells.push({ day: d, level: dayLevels[d] })
   while (dayCells.length % 7 !== 0) dayCells.push({})
 
   const todayDay = today.getDate()
@@ -261,13 +242,11 @@ function LoadCalendarCard({ today = new Date() }: { today?: Date }) {
   )
 }
 
-function ScheduleCard() {
-  const items = [
-    { name: 'Sidney Yates', specialty: 'Ophthalmologist', time: '10:00 AM', status: 'Overbooked', variant: 'destructive' as const },
-    { name: 'Louie Hodges', specialty: 'Cardiologist', time: '10:10 AM', status: 'Available', variant: 'secondary' as const },
-    { name: 'Gerald Rocha', specialty: 'Surgeon', time: '10:20 AM', status: 'No slots', variant: 'outline' as const },
-    { name: 'Wiktor Cross', specialty: 'Dermatologist', time: '10:25 AM', status: 'Available', variant: 'secondary' as const },
-  ]
+function ScheduleCard({ visits }: { visits: Visit[] }) {
+  const items = visits
+    .slice()
+    .sort((a, b) => (a.visitDate < b.visitDate ? -1 : 1))
+    .slice(0, 4)
 
   return (
     <Card className="overflow-hidden">
@@ -287,36 +266,48 @@ function ScheduleCard() {
       <CardContent>
         <div className="rounded-xl border bg-gradient-to-br from-muted/40 to-background">
           <div className="divide-y">
-            {items.map((it) => (
-              <div key={it.name} className="flex items-center justify-between gap-4 px-4 py-3">
-                <div className="flex min-w-0 items-center gap-3">
-                  <Avatar className="h-9 w-9">
-                    <AvatarFallback className="text-xs">
-                      {it.name
-                        .split(' ')
-                        .slice(0, 2)
-                        .map((p) => p[0])
-                        .join('')
-                        .toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-semibold">{it.name}</div>
-                    <div className="truncate text-xs text-muted-foreground">{it.specialty}</div>
-                  </div>
-                </div>
-
-                <div className="flex shrink-0 items-center gap-3">
-                  <div className="text-right">
-                    <div className="text-sm font-medium">{it.time}</div>
-                    <div className="text-xs text-muted-foreground">Today</div>
-                  </div>
-                  <Badge variant={it.variant} className="rounded-full">
-                    {it.status}
-                  </Badge>
-                </div>
+            {items.length === 0 && (
+              <div className="px-4 py-6 text-sm text-muted-foreground">
+                No visits scheduled for today yet.
               </div>
-            ))}
+            )}
+            {items.length > 0 &&
+              items.map((v) => {
+                const time = new Date(v.visitDate)
+                const label = time.toLocaleTimeString(undefined, {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                })
+                const doctorName = v.doctor?.name ?? '—'
+                const specialty = v.doctor?.specialization ?? 'Consultation'
+                const initials = doctorName
+                  .split(' ')
+                  .slice(0, 2)
+                  .map((p) => p[0])
+                  .join('')
+                  .toUpperCase()
+
+                return (
+                  <div key={v.id} className="flex items-center justify-between gap-4 px-4 py-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <Avatar className="h-9 w-9">
+                        <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-semibold">{doctorName}</div>
+                        <div className="truncate text-xs text-muted-foreground">{specialty}</div>
+                      </div>
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-3">
+                      <div className="text-right">
+                        <div className="text-sm font-medium">{label}</div>
+                        <div className="text-xs text-muted-foreground">Today</div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
           </div>
         </div>
       </CardContent>
@@ -327,6 +318,97 @@ function ScheduleCard() {
 export function ReceptionDashboard() {
   const { queue, isLoading, callNext } = useQueue()
   const today = new Date()
+  const qc = useQueryClient()
+  const { subscribe } = useSocket()
+
+  const isoDate = today.toISOString().slice(0, 10)
+
+  const totalPatientsQuery = useQuery({
+    queryKey: ['reports', 'total-patients'],
+    queryFn: () => reportsApi.getTotalPatients(),
+    refetchInterval: 30_000,
+  })
+  const queueStatsQuery = useQuery({
+    queryKey: ['reports', 'queue-stats', isoDate],
+    queryFn: () => reportsApi.getQueueStats(isoDate),
+    refetchInterval: 15_000,
+  })
+
+  const totalPatients = totalPatientsQuery.data?.totalPatients ?? 0
+  const avgWaiting = queueStatsQuery.data?.avgWaitingMinutes ?? 0
+  const activeQueues = queueStatsQuery.data?.doctors?.reduce((sum, d) => sum + d.currentQueue, 0) ?? 0
+  const consultationSlots = 19
+
+  const year = today.getFullYear()
+  const month = today.getMonth()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+
+  const monthVisitsQuery = useQuery({
+    queryKey: ['reports', 'daily-visits-month', year, month],
+    queryFn: async () => {
+      const promises: Promise<{ day: number; total: number }>[] = []
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = new Date(year, month, d).toISOString().slice(0, 10)
+        promises.push(
+          reportsApi.getDailyVisits(dateStr).then((r) => ({
+            day: d,
+            total: r.total,
+          })),
+        )
+      }
+      return Promise.all(promises)
+    },
+    refetchInterval: 60_000,
+  })
+
+  const todayVisitsQuery = useQuery({
+    queryKey: ['visits', 'today'],
+    queryFn: () => visitsApi.getToday(),
+    refetchInterval: 15_000,
+  })
+
+  const monthData = monthVisitsQuery.data ?? []
+
+  const flowData: PatientFlowPoint[] = (() => {
+    const result: PatientFlowPoint[] = []
+    if (!monthData.length) return result
+    const todayDay = today.getDate()
+    for (let offset = 13; offset >= 0; offset--) {
+      const day = todayDay - offset
+      if (day < 1 || day > daysInMonth) continue
+      const entry = monthData.find((d) => d.day === day)
+      result.push({ label: day.toString(), total: entry?.total ?? 0 })
+    }
+    return result
+  })()
+
+  const dayLevels: Record<number, LoadLevel | undefined> = {}
+  for (const d of monthData) {
+    const count = d.total
+    if (!count) continue
+    let level: LoadLevel = 'low'
+    if (count >= 4 && count <= 7) level = 'medium'
+    else if (count > 7) level = 'high'
+    dayLevels[d.day] = level
+  }
+
+  // Live updates: whenever queue changes or visits change, refresh relevant reports.
+  useEffect(() => {
+    const unsubQueue = subscribe('queue:update', () => {
+      qc.invalidateQueries({ queryKey: ['reports', 'queue-stats'] })
+      qc.invalidateQueries({ queryKey: ['visits', 'today'] })
+      qc.invalidateQueries({ queryKey: ['reports', 'daily-visits-month'] })
+    })
+    const unsubDoctor = subscribe('doctor:queue-refresh', () => {
+      qc.invalidateQueries({ queryKey: ['reports', 'queue-stats'] })
+      qc.invalidateQueries({ queryKey: ['visits', 'today'] })
+      qc.invalidateQueries({ queryKey: ['reports', 'daily-visits-month'] })
+    })
+    return () => {
+      unsubQueue()
+      unsubDoctor()
+    }
+  }, [qc, subscribe])
 
   return (
     <Layout>
@@ -361,33 +443,39 @@ export function ReceptionDashboard() {
                     Billing
                   </Link>
                 </Button>
+                <Button asChild variant="outline" className="gap-2">
+                  <Link to="/reception/queues">
+                    <ListOrdered className="h-4 w-4" />
+                    All queues
+                  </Link>
+                </Button>
               </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <KpiCard
                 title="Total patients"
-                value="98"
-                meta="vs last week"
+                value={totalPatients.toString()}
+                meta="visited today"
                 icon={<Users className="h-4 w-4" />}
               />
               <KpiCard
                 title="Avg waiting time"
-                value="7 min"
-                meta="faster this week"
+                value={`${Math.round(avgWaiting)} min`}
+                meta="average across doctors"
                 icon={<Clock3 className="h-4 w-4" />}
                 className="bg-gradient-to-br from-primary/[0.07] via-background to-background"
               />
               <KpiCard
                 title="Active queues"
-                value={queue.length.toString()}
+                value={activeQueues.toString()}
                 meta="patients currently waiting"
                 icon={<Activity className="h-4 w-4" />}
               />
               <KpiCard
                 title="Consultation slots"
-                value="19"
-                meta="open today"
+                value={consultationSlots.toString()}
+                meta="open today (configured)"
                 icon={<CalendarDays className="h-4 w-4" />}
                 className="bg-gradient-to-br from-sky-500/[0.08] via-background to-background"
               />
@@ -399,7 +487,7 @@ export function ReceptionDashboard() {
             className="grid gap-6 xl:grid-cols-[minmax(0,2fr),minmax(320px,1fr)]"
           >
             <div className="space-y-6">
-              <PatientFlowCard />
+              <PatientFlowCard data={flowData} />
 
               <section aria-label="Waiting room queue">
                 <Card className="overflow-hidden border bg-gradient-to-br from-muted/60 via-background to-background shadow-sm">
@@ -429,8 +517,8 @@ export function ReceptionDashboard() {
             </div>
 
             <div className="space-y-6">
-              <LoadCalendarCard today={today} />
-              <ScheduleCard />
+              <LoadCalendarCard today={today} dayLevels={dayLevels} />
+              <ScheduleCard visits={todayVisitsQuery.data ?? []} />
             </div>
           </section>
         </div>

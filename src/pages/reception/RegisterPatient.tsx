@@ -29,7 +29,7 @@ export function RegisterPatient() {
         title="Register Patient"
         breadcrumbs={[{ label: 'Reception', to: '/reception' }, { label: 'Register Patient' }]}
       >
-        <div className="mx-auto max-w-2xl space-y-4">
+        <div className="mx-auto max-w-5xl space-y-4">
           {create.isError && (
             <ErrorMessage
               message={
@@ -42,35 +42,58 @@ export function RegisterPatient() {
           )}
           {successId && (
             <SurfaceCard className="border-emerald-200/60 bg-gradient-to-br from-emerald-50 via-background to-background">
-              <CardHeader>
-                <CardTitle className="text-emerald-800">Patient registered</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-semibold text-emerald-800">
+                  Patient registered
+                </CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col gap-2">
-                <p className="text-sm text-emerald-700">
-                  You can now search for this patient and create a visit.
+              <CardContent className="flex flex-col gap-2 text-sm">
+                <p className="text-emerald-700">
+                  You can now search for this patient and create a visit from the reception
+                  dashboard.
                 </p>
                 <button
                   type="button"
                   onClick={registerAnother}
-                  className="text-left text-sm font-medium text-emerald-800 underline hover:no-underline"
+                  className="self-start text-sm font-medium text-emerald-800 underline hover:no-underline"
                 >
                   Register another patient
                 </button>
               </CardContent>
             </SurfaceCard>
           )}
-          <SurfaceCard>
-            <CardHeader>
-              <CardTitle>New Patient</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PatientForm
-                key={formKey}
-                onSubmit={handleSubmit}
-                isLoading={create.isPending}
-              />
-            </CardContent>
-          </SurfaceCard>
+
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr),minmax(260px,1fr)]">
+            <SurfaceCard>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">New patient</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PatientForm
+                  key={formKey}
+                  onSubmit={handleSubmit}
+                  isLoading={create.isPending}
+                />
+              </CardContent>
+            </SurfaceCard>
+
+            <SurfaceCard className="hidden lg:block">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold">Quick guidelines</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm text-muted-foreground">
+                <p>
+                  Use this form at both **Reception** and **Admin** desks to create a new patient
+                  profile. Required fields are marked and validated automatically.
+                </p>
+                <ul className="list-disc space-y-1 pl-4">
+                  <li>Phone numbers must follow the 03XXXXXXXXX format.</li>
+                  <li>Address is optional and can be updated later from the patient record.</li>
+                  <li>After saving, you can immediately create a visit from the search screen.</li>
+                </ul>
+              </CardContent>
+            </SurfaceCard>
+          </div>
         </div>
       </PageContainer>
     </Layout>

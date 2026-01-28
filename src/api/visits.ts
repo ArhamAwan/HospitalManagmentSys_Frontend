@@ -16,4 +16,9 @@ export const visitsApi = {
     const { data } = await apiClient.patch<Visit>(`/visits/${id}/call`)
     return data
   },
+
+  getToday: async (): Promise<Visit[]> => {
+    const { data } = await apiClient.get<Visit[]>('/visits/today')
+    return data
+  },
 }
