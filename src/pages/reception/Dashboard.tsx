@@ -355,6 +355,12 @@ export function ReceptionDashboard() {
                     Search Patient
                   </Link>
                 </Button>
+                <Button asChild variant="outline" className="gap-2">
+                  <Link to="/reception/billing">
+                    <CalendarDays className="h-4 w-4" />
+                    Billing
+                  </Link>
+                </Button>
               </div>
             </div>
 
@@ -374,8 +380,8 @@ export function ReceptionDashboard() {
               />
               <KpiCard
                 title="Active queues"
-                value="4"
-                meta="departments live"
+                value={queue.length.toString()}
+                meta="patients currently waiting"
                 icon={<Activity className="h-4 w-4" />}
               />
               <KpiCard

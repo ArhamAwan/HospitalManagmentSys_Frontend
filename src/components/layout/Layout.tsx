@@ -13,7 +13,7 @@ export function Layout({ children, className }: LayoutProps) {
    const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   return (
-    <div className={cn('flex min-h-screen flex-col bg-background', className)}>
+    <div className={cn('flex min-h-screen flex-col bg-background text-[15px] md:text-sm', className)}>
       <Navbar
         onMenuClick={() => setSidebarOpen((o) => !o)}
         onToggleSidebar={() => setSidebarCollapsed((c) => !c)}

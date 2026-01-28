@@ -5,6 +5,8 @@ import { PageContainer } from '@/components/layout/PageContainer'
 import { SurfaceCard } from '@/components/ui/surface-card'
 import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { reportsApi } from '@/api/reports'
+import { Button } from '@/components/ui/button'
+import { Link } from 'react-router-dom'
 
 export function AdminDashboard() {
   const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), [])
@@ -52,14 +54,14 @@ export function AdminDashboard() {
               )}
               {!isLoading && (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  <div>
+                  <div className="rounded-xl border bg-card p-3">
                     <p className="text-xs font-medium text-muted-foreground">Total visits</p>
                     <p className="text-3xl font-semibold">{totalPatients}</p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       Across all doctors today.
                     </p>
                   </div>
-                  <div>
+                  <div className="rounded-xl border bg-card p-3">
                     <p className="text-xs font-medium text-muted-foreground">Revenue</p>
                     <p className="text-3xl font-semibold">
                       Rs. {totalRevenue.toLocaleString()}
@@ -68,14 +70,14 @@ export function AdminDashboard() {
                       Confirmed payments today.
                     </p>
                   </div>
-                  <div>
+                  <div className="rounded-xl border bg-card p-3">
                     <p className="text-xs font-medium text-muted-foreground">Avg waiting time</p>
                     <p className="text-3xl font-semibold">{avgWait} min</p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       Based on completed visits.
                     </p>
                   </div>
-                  <div>
+                  <div className="rounded-xl border bg-card p-3">
                     <p className="text-xs font-medium text-muted-foreground">Max queue length</p>
                     <p className="text-3xl font-semibold">{maxQueue}</p>
                     <p className="mt-1 text-xs text-muted-foreground">
@@ -93,7 +95,7 @@ export function AdminDashboard() {
               <CardDescription>Breakdown of today&apos;s visits.</CardDescription>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="overflow-x-auto rounded-md border">
+              <div className="overflow-x-auto rounded-md border bg-card">
                 <table className="w-full text-sm">
                   <thead className="bg-muted/60 text-muted-foreground">
                     <tr className="text-left">
@@ -121,6 +123,26 @@ export function AdminDashboard() {
                     )}
                   </tbody>
                 </table>
+              </div>
+            </CardContent>
+          </SurfaceCard>
+
+          <SurfaceCard>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Quick actions</CardTitle>
+              <CardDescription>Jump directly to common admin tasks.</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="flex flex-wrap gap-3">
+                <Button asChild variant="outline">
+                  <Link to="/admin/users">Manage users</Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/admin/settings">System settings</Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/admin/audit-logs">View audit logs</Link>
+                </Button>
               </div>
             </CardContent>
           </SurfaceCard>

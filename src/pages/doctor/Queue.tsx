@@ -132,12 +132,14 @@ export function DoctorQueue() {
           )}
 
           {!isError && (queue.length > 0 || isLoading) && (
-            <QueueTable
-              items={queue}
-              onCallNext={handleCallNext}
-              isLoading={isLoading}
-              isCalling={callNext.isPending}
-            />
+            <div className="overflow-hidden rounded-xl border bg-card">
+              <QueueTable
+                items={queue}
+                onCallNext={handleCallNext}
+                isLoading={isLoading}
+                isCalling={callNext.isPending}
+              />
+            </div>
           )}
         </div>
       </PageContainer>

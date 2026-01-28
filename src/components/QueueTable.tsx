@@ -43,8 +43,9 @@ export function QueueTable({
   return (
     <div
       className={cn(
-        variant === 'default' && 'rounded-md border',
-        variant === 'bare' && 'border-0',
+        'overflow-x-auto',
+        variant === 'default' && 'rounded-md border bg-card',
+        variant === 'bare' && 'border-0 bg-transparent',
         className
       )}
     >
@@ -77,7 +78,7 @@ export function QueueTable({
                 key={item.visit.id}
                 className={item.visit.isEmergency ? 'bg-destructive/5' : ''}
               >
-                <TableCell className="font-mono font-medium">
+                <TableCell className="whitespace-nowrap font-mono font-medium">
                   {item.visit.tokenNumber}
                   {item.visit.isEmergency && (
                     <Badge variant="emergency" className="ml-2">
@@ -85,12 +86,14 @@ export function QueueTable({
                     </Badge>
                   )}
                 </TableCell>
-                <TableCell>
-                  {item.patient.name}
-                  <span className="ml-1 text-muted-foreground">({item.patient.patientId})</span>
+                <TableCell className="min-w-[200px]">
+                  <div className="truncate">
+                    {item.patient.name}
+                    <span className="ml-1 text-muted-foreground">({item.patient.patientId})</span>
+                  </div>
                 </TableCell>
                 <TableCell>{STATUS_LABELS[item.visit.status]}</TableCell>
-                <TableCell className="text-muted-foreground">
+                <TableCell className="whitespace-nowrap text-muted-foreground">
                   {item.timeWaiting >= 0
                     ? formatDistanceToNow(Date.now() - item.timeWaiting * 1000, {
                         addSuffix: false,

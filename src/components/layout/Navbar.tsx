@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { LogOut, Menu, PanelLeftClose, PanelLeftOpen, User } from 'lucide-react'
+import { LogOut, Menu, PanelLeftClose, PanelLeftOpen, User, KeyRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -104,6 +104,12 @@ export function Navbar({ onMenuClick, onToggleSidebar, sidebarCollapsed, classNa
               <Link to={user?.role === 'DOCTOR' ? '/doctor' : '/reception'} onClick={() => setOpen(false)}>
                 <User className="mr-2 h-4 w-4" />
                 Dashboard
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/account/change-password" onClick={() => setOpen(false)}>
+                <KeyRound className="mr-2 h-4 w-4" />
+                Change password
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />

@@ -13,11 +13,14 @@ import { AdminUsers } from '@/pages/admin/Users'
 import { AdminConfig } from '@/pages/admin/Config'
 import { AdminSettings } from '@/pages/admin/Settings'
 import { AdminAuditLogs } from '@/pages/admin/AuditLogs'
+import { ChangePassword } from '@/pages/ChangePassword'
+import { ForgotPassword } from '@/pages/ForgotPassword'
 
 function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/display/waiting" element={<WaitingArea />} />
       <Route
         path="/reception"
@@ -72,6 +75,14 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={['ADMIN']}>
             <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/account/change-password"
+        element={
+          <ProtectedRoute allowedRoles={['ADMIN', 'RECEPTION', 'DOCTOR']}>
+            <ChangePassword />
           </ProtectedRoute>
         }
       />
