@@ -1,0 +1,23 @@
+import { useState } from 'react'
+import { Navbar } from './Navbar'
+import { Sidebar } from './Sidebar'
+import { cn } from '@/lib/utils'
+
+interface LayoutProps {
+  children: React.ReactNode
+  className?: string
+}
+
+export function Layout({ children, className }: LayoutProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  return (
+    <div className={cn('flex min-h-screen flex-col bg-background', className)}>
+      <Navbar onMenuClick={() => setSidebarOpen((o) => !o)} />
+      <div className="flex flex-1">
+        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <div className="min-w-0 flex-1">{children}</div>
+      </div>
+    </div>
+  )
+}

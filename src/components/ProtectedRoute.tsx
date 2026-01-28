@@ -1,0 +1,32 @@
+import { Navigate, useLocation } from 'react-router-dom'
+import { useAuth } from '@/hooks/useAuth'
+import type { UserRole } from '@/types/user'
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+
+interface ProtectedRouteProps {
+  children: React.ReactNode
+  allowedRoles?: UserRole[]
+}
+
+export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, user } = useAuth()
+  const location = useLocation()
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <LoadingSpinner size="lg" text="Checking authentication…" />
+      </div>
+    )
+  }
+
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" state={{ from: location }} replace /> 
+  }
+
+  if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/login" replace />
+  }
+
+  return <>{children}</>
+}
