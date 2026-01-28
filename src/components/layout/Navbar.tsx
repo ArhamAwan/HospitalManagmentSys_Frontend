@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Menu, LogOut, User } from 'lucide-react'
+import { LogOut, Menu, PanelLeftClose, PanelLeftOpen, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -22,10 +22,12 @@ const ROLE_LABELS: Record<string, string> = {
 
 interface NavbarProps {
   onMenuClick?: () => void
+  onToggleSidebar?: () => void
+  sidebarCollapsed?: boolean
   className?: string
 }
 
-export function Navbar({ onMenuClick, className }: NavbarProps) {
+export function Navbar({ onMenuClick, onToggleSidebar, sidebarCollapsed, className }: NavbarProps) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
@@ -46,15 +48,30 @@ export function Navbar({ onMenuClick, className }: NavbarProps) {
       )}
       role="banner"
     >
-      <Button
-        variant="ghost"
-        size="icon"
-        className="md:hidden"
-        onClick={onMenuClick}
-        aria-label="Toggle menu"
-      >
-        <Menu className="h-5 w-5" />
-      </Button>
+      <div className="flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={onMenuClick}
+          aria-label="Toggle menu"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hidden md:inline-flex"
+          onClick={onToggleSidebar}
+          aria-label="Collapse sidebar"
+        >
+          {sidebarCollapsed ? (
+            <PanelLeftOpen className="h-5 w-5" />
+          ) : (
+            <PanelLeftClose className="h-5 w-5" />
+          )}
+        </Button>
+      </div>
       <Link
         to={user?.role === 'DOCTOR' ? '/doctor' : user?.role === 'ADMIN' ? '/admin' : '/reception'}
         className="flex items-center gap-2 font-semibold text-foreground"

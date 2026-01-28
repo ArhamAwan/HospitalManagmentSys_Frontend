@@ -3,6 +3,7 @@ import { Layout } from '@/components/layout/Layout'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { SurfaceCard } from '@/components/ui/surface-card'
 import {
   Table,
   TableBody,
@@ -50,18 +51,20 @@ export function SearchPatient() {
         breadcrumbs={[{ label: 'Reception', to: '/reception' }, { label: 'Search Patient' }]}
       >
         <div className="space-y-4">
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search by name, phone, or patient ID…"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="pl-9"
-                aria-label="Search patients"
-              />
+          <SurfaceCard className="p-4">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name, phone, or patient ID…"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="pl-9"
+                  aria-label="Search patients"
+                />
+              </div>
             </div>
-          </div>
+          </SurfaceCard>
 
           {search.isError && (
             <ErrorMessage
@@ -93,7 +96,7 @@ export function SearchPatient() {
                   description="Try a different search or register a new patient."
                 />
               ) : (
-                <div className="rounded-md border">
+                <div className="overflow-hidden rounded-xl border bg-card">
                   <Table>
                     <TableHeader>
                       <TableRow>

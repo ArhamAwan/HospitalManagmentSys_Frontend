@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Layout } from '@/components/layout/Layout'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { PatientForm } from '@/components/forms/PatientForm'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { SurfaceCard } from '@/components/ui/surface-card'
 import { usePatientCreate } from '@/hooks/usePatients'
 import { ErrorMessage } from '@/components/ui/ErrorMessage'
 import type { CreatePatientDto } from '@/types/patient'
@@ -40,25 +41,25 @@ export function RegisterPatient() {
             />
           )}
           {successId && (
-            <Card className="border-green-200 bg-green-50">
+            <SurfaceCard className="border-emerald-200/60 bg-gradient-to-br from-emerald-50 via-background to-background">
               <CardHeader>
-                <CardTitle className="text-green-800">Patient registered</CardTitle>
+                <CardTitle className="text-emerald-800">Patient registered</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-2">
-                <p className="text-sm text-green-700">
+                <p className="text-sm text-emerald-700">
                   You can now search for this patient and create a visit.
                 </p>
                 <button
                   type="button"
                   onClick={registerAnother}
-                  className="text-left text-sm font-medium text-green-800 underline hover:no-underline"
+                  className="text-left text-sm font-medium text-emerald-800 underline hover:no-underline"
                 >
                   Register another patient
                 </button>
               </CardContent>
-            </Card>
+            </SurfaceCard>
           )}
-          <Card>
+          <SurfaceCard>
             <CardHeader>
               <CardTitle>New Patient</CardTitle>
             </CardHeader>
@@ -69,7 +70,7 @@ export function RegisterPatient() {
                 isLoading={create.isPending}
               />
             </CardContent>
-          </Card>
+          </SurfaceCard>
         </div>
       </PageContainer>
     </Layout>

@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/select'
 import { useDoctors } from '@/hooks/useDoctors'
 import { useVisitCreate } from '@/hooks/useVisits'
+import { useQueue } from '@/hooks/useQueue'
 import type { Patient } from '@/types/patient'
 import { Loader2 } from 'lucide-react'
 
@@ -48,6 +49,15 @@ export function VisitForm({ patient, onSuccess, onCancel }: VisitFormProps) {
 
   const doctorId = form.watch('doctorId')
   const selectedDoctor = doctors.find((d) => d.id === doctorId)
+  const { queue } = useQueue(doctorId || undefined)
+  const estimated = (() => {
+    if (token == null) return null
+    const idx = queue.findIndex((i) => i.visit.tokenNumber === token)
+    if (idx < 0) return null
+    // Simple heuristic until real SLA/avg duration is tracked.
+    const AVG_CONSULT_MIN = 15
+    return { position: idx + 1, minutes: idx * AVG_CONSULT_MIN }
+  })()
 
   const handleSubmit = form.handleSubmit(async (values) => {
     const visit = await createVisit.mutateAsync({
@@ -67,6 +77,18 @@ export function VisitForm({ patient, onSuccess, onCancel }: VisitFormProps) {
         <p className="text-sm text-muted-foreground">
           {patient.name} — {selectedDoctor?.name ?? 'Doctor'}
         </p>
+        {selectedDoctor?.roomNumber && (
+          <p className="text-sm text-muted-foreground">Room {selectedDoctor.roomNumber}</p>
+        )}
+        {estimated && (
+          <p className="text-sm">
+            <span className="text-muted-foreground">Estimated wait:</span>{' '}
+            <span className="font-medium">
+              {estimated.minutes <= 0 ? 'Up next' : `~${estimated.minutes} min`}
+            </span>{' '}
+            <span className="text-muted-foreground">(position {estimated.position})</span>
+          </p>
+        )}
         {onCancel && (
           <Button onClick={onCancel}>Done</Button>
         )}

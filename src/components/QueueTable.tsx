@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { QueueItem } from '@/types/visit'
 import type { VisitStatus } from '@/types/visit'
+import { cn } from '@/lib/utils'
 
 const STATUS_LABELS: Record<VisitStatus, string> = {
   WAITING: 'Waiting',
@@ -24,14 +25,29 @@ interface QueueTableProps {
   onCallNext?: (visitId: string) => void
   isLoading?: boolean
   isCalling?: boolean
+  variant?: 'default' | 'bare'
+  className?: string
 }
 
-export function QueueTable({ items, onCallNext, isLoading, isCalling }: QueueTableProps) {
+export function QueueTable({
+  items,
+  onCallNext,
+  isLoading,
+  isCalling,
+  variant = 'default',
+  className,
+}: QueueTableProps) {
   const waiting = items.filter((i) => i.visit.status === 'WAITING')
   const firstWaiting = waiting[0]
 
   return (
-    <div className="rounded-md border">
+    <div
+      className={cn(
+        variant === 'default' && 'rounded-md border',
+        variant === 'bare' && 'border-0',
+        className
+      )}
+    >
       <Table>
         <TableHeader>
           <TableRow>

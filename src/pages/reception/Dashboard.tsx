@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { QueueTable } from '@/components/QueueTable'
+import { useQueue } from '@/hooks/useQueue'
 import { cn } from '@/lib/utils'
 import {
   Activity,
@@ -200,8 +202,8 @@ function LoadCalendarCard({ today = new Date() }: { today?: Date }) {
       <CardContent>
         <div className="grid gap-4 rounded-xl border bg-gradient-to-br from-muted/40 to-background p-4">
           <div className="grid grid-cols-7 gap-2 text-center text-xs text-muted-foreground">
-            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d) => (
-              <div key={d} className="py-1 font-medium">
+            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, idx) => (
+              <div key={`${d}-${idx}`} className="py-1 font-medium">
                 {d}
               </div>
             ))}
@@ -323,12 +325,13 @@ function ScheduleCard() {
 }
 
 export function ReceptionDashboard() {
+  const { queue, isLoading, callNext } = useQueue()
   const today = new Date()
 
   return (
     <Layout>
       <PageContainer title="Reception Dashboard">
-        <div className="space-y-6">
+        <div className="space-y-8">
           <section aria-label="Reception overview header" className="space-y-4">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="space-y-1">
@@ -391,6 +394,32 @@ export function ReceptionDashboard() {
           >
             <div className="space-y-6">
               <PatientFlowCard />
+
+              <section aria-label="Waiting room queue">
+                <Card className="overflow-hidden border bg-gradient-to-br from-muted/60 via-background to-background shadow-sm">
+                  <CardHeader className="pb-3">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                      <div>
+                        <CardTitle className="text-lg">Waiting room queue</CardTitle>
+                        <CardDescription>
+                          Live view of all patients currently in queue.
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="overflow-hidden rounded-xl border bg-card">
+                      <QueueTable
+                        items={queue}
+                        isLoading={isLoading}
+                        onCallNext={(visitId) => callNext.mutate(visitId)}
+                        isCalling={callNext.isPending}
+                        variant="bare"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </section>
             </div>
 
             <div className="space-y-6">

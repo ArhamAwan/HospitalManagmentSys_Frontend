@@ -12,6 +12,7 @@ export function WaitingArea() {
   const { doctors, connected, currentTime, isLoading } = useWaitingDisplay()
   const [idle, setIdle] = useState(false)
   const [moved, setMoved] = useState(false)
+  const emergencyRooms = doctors.filter((d) => d.isEmergency)
 
   const onActivity = useCallback(() => {
     setMoved(true)
@@ -64,6 +65,26 @@ export function WaitingArea() {
           </div>
         </div>
       </div>
+
+      {emergencyRooms.length > 0 && (
+        <div className="shrink-0 border-b border-red-200 bg-red-50/90 px-6 py-3">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+            <div className="text-lg font-semibold text-red-800">
+              Emergency active
+            </div>
+            <div className="flex flex-wrap items-center gap-3 text-sm text-red-800">
+              {emergencyRooms.slice(0, 4).map((d) => (
+                <span key={d.doctor.id} className="rounded-full bg-white/70 px-3 py-1">
+                  Room {d.doctor.roomNumber} — Token {d.currentToken ?? '—'}
+                </span>
+              ))}
+              {emergencyRooms.length > 4 && (
+                <span className="text-red-700">+{emergencyRooms.length - 4} more</span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <main className="flex-1 overflow-auto p-6 md:p-8">
         {isLoading ? (

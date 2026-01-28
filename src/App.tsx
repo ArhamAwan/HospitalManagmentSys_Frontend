@@ -4,10 +4,15 @@ import { Login } from '@/pages/Login'
 import { ReceptionDashboard } from '@/pages/reception/Dashboard'
 import { RegisterPatient } from '@/pages/reception/RegisterPatient'
 import { SearchPatient } from '@/pages/reception/SearchPatient'
+import { ReceptionBilling } from '@/pages/reception/Billing'
 import { DoctorQueue } from '@/pages/doctor/Queue'
 import { PatientDetails } from '@/pages/doctor/PatientDetails'
 import { WaitingArea } from '@/pages/display/WaitingArea'
 import { AdminDashboard } from '@/pages/admin/Dashboard'
+import { AdminUsers } from '@/pages/admin/Users'
+import { AdminConfig } from '@/pages/admin/Config'
+import { AdminSettings } from '@/pages/admin/Settings'
+import { AdminAuditLogs } from '@/pages/admin/AuditLogs'
 
 function App() {
   return (
@@ -39,6 +44,14 @@ function App() {
         }
       />
       <Route
+        path="/reception/billing"
+        element={
+          <ProtectedRoute allowedRoles={['RECEPTION', 'ADMIN']}>
+            <ReceptionBilling />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/doctor"
         element={
           <ProtectedRoute allowedRoles={['DOCTOR', 'ADMIN']}>
@@ -59,6 +72,38 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={['ADMIN']}>
             <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/config"
+        element={
+          <ProtectedRoute allowedRoles={['ADMIN']}>
+            <AdminConfig />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/settings"
+        element={
+          <ProtectedRoute allowedRoles={['ADMIN']}>
+            <AdminSettings />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/audit-logs"
+        element={
+          <ProtectedRoute allowedRoles={['ADMIN']}>
+            <AdminAuditLogs />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <ProtectedRoute allowedRoles={['ADMIN']}>
+            <AdminUsers />
           </ProtectedRoute>
         }
       />
