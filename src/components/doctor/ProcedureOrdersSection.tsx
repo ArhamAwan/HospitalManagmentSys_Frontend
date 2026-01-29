@@ -94,10 +94,16 @@ export function ProcedureOrdersSection({ visitId, orders, onOrdersChange }: Proc
                 className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs ${
                   o.status === 'COMPLETED'
                     ? 'bg-emerald-100 text-emerald-700'
-                    : 'bg-amber-100 text-amber-700'
+                    : o.status === 'IN_PROGRESS'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'bg-amber-100 text-amber-700'
                 }`}
               >
-                {o.status === 'COMPLETED' ? 'Completed' : 'Requested'}
+                {o.status === 'COMPLETED'
+                  ? 'Completed'
+                  : o.status === 'IN_PROGRESS'
+                    ? 'In Progress'
+                    : 'Requested'}
               </span>
             </div>
           ))}

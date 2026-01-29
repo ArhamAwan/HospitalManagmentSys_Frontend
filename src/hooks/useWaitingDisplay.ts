@@ -17,7 +17,12 @@ export function useWaitingDisplay() {
     queryKey: ['doctors'],
     queryFn: () => doctorsApi.getAll(),
   })
-  const { connected, subscribe } = useSocket()
+  const { connected, subscribe, socket } = useSocket()
+
+  useEffect(() => {
+    // Identify this client as a waiting-area display for targeted events.
+    socket.emit('join:display')
+  }, [socket])
 
   useEffect(() => {
     const t = setInterval(() => setCurrentTime(new Date()), 1000)

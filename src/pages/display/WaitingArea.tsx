@@ -70,7 +70,7 @@ export function WaitingArea() {
         <div className="shrink-0 border-b border-red-200 bg-red-50/90 px-6 py-3">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
             <div className="text-lg font-semibold text-red-800">
-              Emergency active
+              EMERGENCY
             </div>
             <div className="flex flex-wrap items-center gap-3 text-sm text-red-800">
               {emergencyRooms.slice(0, 4).map((d) => (

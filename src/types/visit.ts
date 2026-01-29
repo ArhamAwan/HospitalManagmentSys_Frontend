@@ -1,6 +1,6 @@
 import type { Patient } from './patient'
 
-export type ProcedureStatus = 'REQUESTED' | 'COMPLETED'
+export type ProcedureStatus = 'REQUESTED' | 'IN_PROGRESS' | 'COMPLETED'
 
 export interface ProcedureSummary {
   id: string
@@ -8,6 +8,7 @@ export interface ProcedureSummary {
   name: string
   department?: string | null
   defaultFee: number
+  hourlyRate?: number | null
 }
 
 export interface ProcedureOrder {
@@ -17,7 +18,28 @@ export interface ProcedureOrder {
   procedure: ProcedureSummary
   notes?: string | null
   status: ProcedureStatus
+  startedAt?: string | null
+  completedAt?: string | null
   createdAt: string
+  visit?: {
+    id: string
+    patientId: string
+    tokenNumber: number
+    isEmergency: boolean
+    patient: {
+      id: string
+      patientId: string
+      name: string
+      age: number
+      gender: string
+    }
+    doctor?: {
+      id: string
+      name: string
+      specialization: string
+      roomNumber: string
+    }
+  }
 }
 
 export interface PrescriptionMedicine {
@@ -58,6 +80,7 @@ export interface Visit {
   status: VisitStatus
   isEmergency: boolean
   consultationFee: number
+  completedAt?: string
   patient?: Patient
   doctor?: Doctor
   prescription?: Prescription

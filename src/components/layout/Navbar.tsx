@@ -18,6 +18,8 @@ const ROLE_LABELS: Record<string, string> = {
   ADMIN: 'Admin',
   RECEPTION: 'Reception',
   DOCTOR: 'Doctor',
+  NURSE: 'Nurse',
+  DISPLAY: 'Display',
 }
 
 interface NavbarProps {

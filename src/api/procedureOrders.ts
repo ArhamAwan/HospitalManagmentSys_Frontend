@@ -15,6 +15,16 @@ export const procedureOrdersApi = {
     return data
   },
 
+  listOngoing: async (): Promise<ProcedureOrder[]> => {
+    const { data } = await apiClient.get<ProcedureOrder[]>('/procedure-orders/ongoing')
+    return data
+  },
+
+  listRequested: async (): Promise<ProcedureOrder[]> => {
+    const { data } = await apiClient.get<ProcedureOrder[]>('/procedure-orders/requested')
+    return data
+  },
+
   create: async (dto: CreateProcedureOrderDto): Promise<ProcedureOrder> => {
     const { data } = await apiClient.post<ProcedureOrder>('/procedure-orders', dto)
     return data
@@ -24,6 +34,16 @@ export const procedureOrdersApi = {
     const { data } = await apiClient.patch<ProcedureOrder>(`/procedure-orders/${id}/status`, {
       status,
     })
+    return data
+  },
+
+  startProcedure: async (id: string): Promise<ProcedureOrder> => {
+    const { data } = await apiClient.patch<ProcedureOrder>(`/procedure-orders/${id}/start`)
+    return data
+  },
+
+  completeProcedure: async (id: string): Promise<ProcedureOrder> => {
+    const { data } = await apiClient.patch<ProcedureOrder>(`/procedure-orders/${id}/complete`)
     return data
   },
 }

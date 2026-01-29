@@ -6,9 +6,10 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 interface ProtectedRouteProps {
   children: React.ReactNode
   allowedRoles?: UserRole[]
+  redirectTo?: string
 }
 
-export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, allowedRoles, redirectTo = '/login' }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, user } = useAuth()
   const location = useLocation()
 
@@ -21,11 +22,11 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
   }
 
   if (!isAuthenticated || !user) {
-    return <Navigate to="/login" state={{ from: location }} replace /> 
+    return <Navigate to={redirectTo} state={{ from: location }} replace />
   }
 
   if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/login" replace />
+    return <Navigate to={redirectTo} replace />
   }
 
   return <>{children}</>

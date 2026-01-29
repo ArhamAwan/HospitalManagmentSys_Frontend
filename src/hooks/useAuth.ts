@@ -22,21 +22,25 @@ export function useAuth() {
       setInitialized(true)
       return
     }
+    // Optimistically hydrate user from storage to prevent redirect loops on reloads.
+    const storedUser = getStoredUser()
+    if (storedUser) {
+      useAuthStore.setState({ user: storedUser })
+    }
     if (MOCK_AUTH) {
-      const storedUser = getStoredUser()
-      if (storedUser) {
-        useAuthStore.setState({ user: storedUser })
-      } else {
-        useAuthStore.getState().logout()
-      }
+      if (!storedUser) useAuthStore.getState().logout()
       setInitialized(true)
       return
     }
     try {
       const me = await authApi.getMe()
       useAuthStore.setState({ user: me })
-    } catch {
-      useAuthStore.getState().logout()
+    } catch (err: any) {
+      // Only logout when the token is actually invalid/expired.
+      if (err?.response?.status === 401) {
+        useAuthStore.getState().logout()
+      }
+      // For 429/5xx/network errors, keep stored auth and let UI show errors.
     } finally {
       setInitialized(true)
     }

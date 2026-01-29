@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Label } from '@/components/ui/label'
 import { prescriptionsApi } from '@/api/prescriptions'
 import type { Prescription } from '@/types/visit'
 
@@ -120,7 +121,7 @@ export function PrescriptionForm({ visitId, initial, onSaved }: PrescriptionForm
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <FormLabel className="text-base">Medicines</FormLabel>
+            <Label className="text-base">Medicines</Label>
             <Button
               type="button"
               variant="outline"

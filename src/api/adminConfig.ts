@@ -24,6 +24,7 @@ export interface AdminProcedure {
   name: string
   department?: string | null
   defaultFee: number
+  hourlyRate?: number | null
   createdAt: string
 }
 
@@ -45,6 +46,7 @@ export interface CreateProcedureDto {
   name: string
   department?: string
   defaultFee: number
+  hourlyRate?: number
 }
 
 export interface UpdateProcedureDto {
@@ -52,6 +54,7 @@ export interface UpdateProcedureDto {
   name?: string
   department?: string
   defaultFee?: number
+  hourlyRate?: number
 }
 
 export interface UpdateDoctorConfigDto {

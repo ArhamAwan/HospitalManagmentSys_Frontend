@@ -31,6 +31,7 @@ export function DoctorCard({ data, className }: DoctorCardProps) {
         <p className="text-base text-muted-foreground">{doctor.name}</p>
       </CardHeader>
       <CardContent>
+        <p className="text-sm font-medium text-muted-foreground">Now Serving</p>
         <p
           className="font-mono text-[96px] font-bold tabular-nums leading-none text-primary"
           aria-label={`Current token: ${currentToken ?? 'none'}`}

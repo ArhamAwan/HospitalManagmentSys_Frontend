@@ -27,13 +27,14 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { ErrorMessage } from '@/components/ui/ErrorMessage'
 import type { UserRole } from '@/types/user'
 
-const ROLE_OPTIONS: UserRole[] = ['ADMIN', 'RECEPTION', 'DOCTOR']
+const ROLE_OPTIONS: UserRole[] = ['ADMIN', 'RECEPTION', 'DOCTOR', 'NURSE']
 const STATUS_OPTIONS: UserStatus[] = ['ACTIVE', 'LOCKED', 'DISABLED']
 
 function formatRole(role: UserRole) {
   if (role === 'ADMIN') return 'Admin'
   if (role === 'RECEPTION') return 'Reception'
   if (role === 'DOCTOR') return 'Doctor'
+  if (role === 'NURSE') return 'Nurse'
   return role
 }
 

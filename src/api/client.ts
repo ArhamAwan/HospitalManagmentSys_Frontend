@@ -19,6 +19,14 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (res) => res,
   (err) => {
+    // Handle network errors (connection refused, etc.)
+    if (!err.response && err.code === 'ERR_NETWORK') {
+      console.error('Network error: Backend server may be unavailable', err)
+      // Don't redirect on network errors - let components handle it
+      return Promise.reject(err)
+    }
+    
+    // Handle 401 Unauthorized
     if (err.response?.status === 401) {
       useAuthStore.getState().logout()
       window.location.replace('/login')

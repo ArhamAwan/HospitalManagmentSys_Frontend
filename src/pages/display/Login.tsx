@@ -1,7 +1,11 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useNavigate, useLocation, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { Loader2, Monitor } from 'lucide-react'
+
+import { useAuth } from '@/hooks/useAuth'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,10 +17,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { useAuth } from '@/hooks/useAuth'
-import { useEffect, useState } from 'react'
-import type { UserRole } from '@/types/user'
-import { Loader2 } from 'lucide-react'
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -25,81 +25,43 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>
 
-function getDefaultRoute(role: UserRole): string {
-  switch (role) {
-    case 'RECEPTION':
-    case 'ADMIN':
-      return '/reception'
-    case 'DOCTOR':
-      return '/doctor'
-    case 'NURSE':
-      return '/nurse'
-    case 'DISPLAY':
-      return '/display/waiting'
-    default:
-      return '/reception'
-  }
-}
-
-export function Login() {
-  const { login, isAuthenticated, isLoading, user } = useAuth()
+export function DisplayLogin() {
+  const { login } = useAuth()
   const navigate = useNavigate()
-  const location = useLocation()
   const [error, setError] = useState<string | null>(null)
-  const [hasRedirected, setHasRedirected] = useState(false)
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: { username: '', password: '' },
   })
 
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname
-
   const onSubmit = async (data: LoginFormData) => {
     setError(null)
     try {
       const res = await login(data)
-      navigate(from ?? getDefaultRoute(res.user.role), { replace: true })
+      if (res.user.role !== 'DISPLAY' && res.user.role !== 'ADMIN') {
+        setError('This account is not allowed to access the Waiting Area display.')
+        return
+      }
+      navigate('/display/waiting', { replace: true })
     } catch (e: unknown) {
       const msg =
         e && typeof e === 'object' && 'response' in e
           ? (e as { response?: { data?: { message?: string } } }).response?.data?.message
           : null
-      setError(msg ?? 'Invalid username or password. Please try again.')
+      setError(msg ?? 'Login failed. Please try again.')
     }
-  }
-
-  useEffect(() => {
-    if (isAuthenticated && !hasRedirected) {
-      setHasRedirected(true)
-      navigate(from ?? (user ? getDefaultRoute(user.role) : '/reception'), { replace: true })
-    }
-  }, [isAuthenticated, hasRedirected, navigate, from, user])
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" aria-label="Loading" />
-      </div>
-    )
-  }
-
-  if (isAuthenticated && hasRedirected) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" aria-label="Redirecting" />
-      </div>
-    )
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-cyan-50/30 p-4">
       <Card className="w-full max-w-md border-slate-200 bg-white shadow-lg">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold text-slate-800">
-            Atta Khan Memorial Hospital
-          </CardTitle>
-          <CardDescription>Sign in to access the management system</CardDescription>
+          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Monitor className="h-6 w-6" />
+          </div>
+          <CardTitle className="text-2xl font-bold text-slate-800">Waiting Area Display</CardTitle>
+          <CardDescription>Sign in to show the waiting area screen</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -119,12 +81,7 @@ export function Login() {
                   <FormItem>
                     <FormLabel>Username</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Enter username"
-                        autoComplete="username"
-                        autoFocus
-                        {...field}
-                      />
+                      <Input placeholder="Enter username" autoComplete="username" autoFocus {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -137,30 +94,13 @@ export function Login() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Enter password"
-                        autoComplete="current-password"
-                        {...field}
-                      />
+                      <Input type="password" placeholder="Enter password" autoComplete="current-password" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <div className="flex justify-end">
-                <Link
-                  to="/forgot-password"
-                  className="text-xs font-medium text-primary hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={form.formState.isSubmitting}
-              >
+              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -177,3 +117,4 @@ export function Login() {
     </div>
   )
 }
+

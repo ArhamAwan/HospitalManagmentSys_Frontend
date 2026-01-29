@@ -495,6 +495,7 @@ function ProceduresTab() {
     name: '',
     department: '',
     defaultFee: 0,
+    hourlyRate: undefined,
   })
   const [editForm, setEditForm] = useState<UpdateProcedureDto>({})
 
@@ -503,7 +504,7 @@ function ProceduresTab() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin', 'config', 'procedures'] })
       setCreateOpen(false)
-      setCreateForm({ code: '', name: '', department: '', defaultFee: 0 })
+      setCreateForm({ code: '', name: '', department: '', defaultFee: 0, hourlyRate: undefined })
     },
   })
 
@@ -531,6 +532,7 @@ function ProceduresTab() {
       name: p.name,
       department: p.department ?? '',
       defaultFee: p.defaultFee,
+      hourlyRate: p.hourlyRate ?? undefined,
     })
   }
 
@@ -662,6 +664,21 @@ function ProceduresTab() {
                 }
               />
             </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Hourly rate (optional, for duration-based billing)</label>
+              <Input
+                type="number"
+                step="0.01"
+                value={createForm.hourlyRate?.toString() ?? ''}
+                onChange={(e) =>
+                  setCreateForm((f) => ({
+                    ...f,
+                    hourlyRate: e.target.value ? Number(e.target.value) : undefined,
+                  }))
+                }
+                placeholder="Leave blank if not applicable"
+              />
+            </div>
           </div>
           <DialogFooter className="mt-4">
             <Button
@@ -724,6 +741,21 @@ function ProceduresTab() {
                     defaultFee: Number(e.target.value || 0),
                   }))
                 }
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Hourly rate (optional, for duration-based billing)</label>
+              <Input
+                type="number"
+                step="0.01"
+                value={editForm.hourlyRate?.toString() ?? ''}
+                onChange={(e) =>
+                  setEditForm((f) => ({
+                    ...f,
+                    hourlyRate: e.target.value ? Number(e.target.value) : undefined,
+                  }))
+                }
+                placeholder="Leave blank if not applicable"
               />
             </div>
           </div>

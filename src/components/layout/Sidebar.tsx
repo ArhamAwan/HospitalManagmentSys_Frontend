@@ -9,6 +9,7 @@ import {
   Settings2,
   SlidersHorizontal,
   History,
+  ClipboardList,
   X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -27,7 +28,7 @@ interface NavItem {
   label: string
   icon: React.ElementType
   roles: string[]
-  section: 'RECEPTION' | 'DOCTOR' | 'ADMIN'
+  section: 'RECEPTION' | 'DOCTOR' | 'NURSE' | 'ADMIN'
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -65,6 +66,20 @@ const NAV_ITEMS: NavItem[] = [
     icon: ListOrdered,
     roles: ['DOCTOR'],
     section: 'DOCTOR',
+  },
+  {
+    to: '/doctor/history',
+    label: 'History',
+    icon: History,
+    roles: ['DOCTOR'],
+    section: 'DOCTOR',
+  },
+  {
+    to: '/nurse',
+    label: 'Procedure Monitoring',
+    icon: ClipboardList,
+    roles: ['NURSE'],
+    section: 'NURSE',
   },
   {
     to: '/admin',
@@ -123,6 +138,7 @@ export function Sidebar({
   const sections: { id: NavItem['section']; label: string }[] = [
     { id: 'RECEPTION', label: 'Reception' },
     { id: 'DOCTOR', label: 'Doctor' },
+    { id: 'NURSE', label: 'Nurse' },
     { id: 'ADMIN', label: 'Admin' },
   ]
 
